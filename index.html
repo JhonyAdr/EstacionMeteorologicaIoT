@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estación Meteorológica IoT</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Estación Meteorológica IoT</h1>
+            <p class="subtitle">Monitoreo en tiempo real</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="current-data">
+                <div class="card">
+                    <h2>Datos Actuales</h2>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <span class="label">Temperatura</span>
+                            <span id="temperature" class="value">--°C</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">Humedad</span>
+                            <span id="humidity" class="value">--%</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">Presión</span>
+                            <span id="pressure" class="value">-- hPa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="predictions">
+                <div class="card">
+                    <h2>Predicciones</h2>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <span class="label">Probabilidad de Lluvia</span>
+                            <span id="rain-probability" class="value">--%</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="label">Riesgo de Frío</span>
+                            <span id="cold-risk" class="value">--%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts">
+                <div class="card">
+                    <h2>Histórico de Temperatura</h2>
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+                <div class="card">
+                    <h2>Histórico de Humedad</h2>
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
