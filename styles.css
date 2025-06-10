@@ -91,6 +91,9 @@ h1 {
 
 .charts {
     grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing);
 }
 
 canvas {
@@ -104,6 +107,10 @@ canvas {
     }
 
     .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .charts {
         grid-template-columns: 1fr;
     }
 
