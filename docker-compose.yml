@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: estacion-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: jhonadr159
+      MYSQL_DATABASE: estacion_meteorologica
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: estacion-backend
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: jhonadr159
+      DB_NAME: estacion_meteorologica
+      PORT: 3001
+    depends_on:
+      - mysql
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: .
+    container_name: estacion-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data: 

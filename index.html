@@ -47,22 +47,52 @@
                             <span class="label">Riesgo de Frío</span>
                             <span id="cold-risk" class="value">--%</span>
                         </div>
+                        <div class="data-item">
+                            <span class="label">Índice de Confort</span>
+                            <span id="comfort-index" class="value">--%</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="charts">
+            <div class="prediction-history">
                 <div class="card">
+                    <h2>Historial de Predicciones</h2>
+                    <div class="history-container">
+                        <div class="history-header">
+                            <span>Hora</span>
+                            <span>Temp</span>
+                            <span>Humedad</span>
+                            <span>Presión</span>
+                            <span>Lluvia</span>
+                            <span>Frío</span>
+                            <span>Confort</span>
+                        </div>
+                        <div id="prediction-history-list" class="history-list">
+                            <!-- El historial se llenará dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
                     <h2>Histórico de Temperatura</h2>
-                    <canvas id="temperatureChart"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
                 </div>
-                <div class="card">
+                <div class="chart-card">
                     <h2>Histórico de Humedad</h2>
-                    <canvas id="humidityChart"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="humidityChart"></canvas>
+                    </div>
                 </div>
-                <div class="card">
+                <div class="chart-card">
                     <h2>Histórico de Presión</h2>
-                    <canvas id="pressureChart"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="pressureChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>

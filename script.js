@@ -11,6 +11,8 @@ let humidityData = [];
 let pressureData = [];
 let timeLabels = [];
 let lastUpdateTime = null;
+let predictionHistory = [];
+const maxHistoryItems = 10;
 
 // Función para formatear la hora con segundos
 function formatTime(date) {
@@ -103,13 +105,14 @@ function initializeCharts() {
             datasets: [{
                 label: 'Temperatura (°C)',
                 data: temperatureData,
-                borderColor: '#2196F3',
-                backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                borderColor: '#00ff9d',
+                backgroundColor: 'rgba(0, 255, 157, 0.1)',
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointStyle: 'circle'
+                pointStyle: 'circle',
+                borderWidth: 2
             }]
         },
         options: {
@@ -122,7 +125,29 @@ function initializeCharts() {
                     min: 0,
                     max: 40,
                     ticks: {
-                        stepSize: 5
+                        stepSize: 5,
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ...commonOptions.scales.x,
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                ...commonOptions.plugins,
+                legend: {
+                    ...commonOptions.plugins.legend,
+                    labels: {
+                        color: '#ffffff'
                     }
                 }
             }
@@ -136,13 +161,14 @@ function initializeCharts() {
             datasets: [{
                 label: 'Humedad (%)',
                 data: humidityData,
-                borderColor: '#4CAF50',
-                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                borderColor: '#00b8ff',
+                backgroundColor: 'rgba(0, 184, 255, 0.1)',
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointStyle: 'circle'
+                pointStyle: 'circle',
+                borderWidth: 2
             }]
         },
         options: {
@@ -155,7 +181,29 @@ function initializeCharts() {
                     min: 0,
                     max: 100,
                     ticks: {
-                        stepSize: 10
+                        stepSize: 10,
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ...commonOptions.scales.x,
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                ...commonOptions.plugins,
+                legend: {
+                    ...commonOptions.plugins.legend,
+                    labels: {
+                        color: '#ffffff'
                     }
                 }
             }
@@ -169,13 +217,14 @@ function initializeCharts() {
             datasets: [{
                 label: 'Presión (hPa)',
                 data: pressureData,
-                borderColor: '#FF9800',
-                backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                borderColor: '#ff3d00',
+                backgroundColor: 'rgba(255, 61, 0, 0.1)',
                 tension: 0.4,
                 fill: true,
                 pointRadius: 4,
                 pointHoverRadius: 6,
-                pointStyle: 'circle'
+                pointStyle: 'circle',
+                borderWidth: 2
             }]
         },
         options: {
@@ -188,12 +237,108 @@ function initializeCharts() {
                     min: 900,
                     max: 1050,
                     ticks: {
-                        stepSize: 25
+                        stepSize: 25,
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ...commonOptions.scales.x,
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                ...commonOptions.plugins,
+                legend: {
+                    ...commonOptions.plugins.legend,
+                    labels: {
+                        color: '#ffffff'
                     }
                 }
             }
         }
     });
+}
+
+// Función para cargar el historial desde localStorage
+function loadPredictionHistory() {
+    const savedHistory = localStorage.getItem('predictionHistory');
+    if (savedHistory) {
+        predictionHistory = JSON.parse(savedHistory);
+        updateHistoryDisplay();
+    }
+}
+
+// Función para guardar el historial en localStorage
+function savePredictionHistory() {
+    localStorage.setItem('predictionHistory', JSON.stringify(predictionHistory));
+}
+
+// Función para actualizar la visualización del historial
+function updateHistoryDisplay() {
+    const historyList = document.getElementById('prediction-history-list');
+    historyList.innerHTML = predictionHistory.map(item => `
+        <div class="history-item">
+            <span class="time">${item.time}</span>
+            <span class="temp">${item.temp}°C</span>
+            <span class="humidity">${item.humidity}%</span>
+            <span class="pressure">${item.pressure} hPa</span>
+            <span class="rain">${item.rain}%</span>
+            <span class="cold">${item.cold}%</span>
+            <span class="comfort">${item.comfort}%</span>
+        </div>
+    `).join('');
+}
+
+// Función para actualizar el historial de predicciones
+function updatePredictionHistory(data) {
+    // Verificar si es un nuevo dato comparando con el último tiempo de actualización
+    if (lastUpdateTime !== data.created_at) {
+        const historyItem = {
+            time: formatTime(new Date(data.created_at)),
+            temp: data.temperature.toFixed(1),
+            humidity: data.humidity.toFixed(1),
+            pressure: data.pressure.toFixed(1),
+            rain: data.rainProbability,
+            cold: data.coldRisk,
+            comfort: data.comfortIndex
+        };
+
+        predictionHistory.unshift(historyItem);
+        
+        // Mantener solo los últimos maxHistoryItems
+        if (predictionHistory.length > maxHistoryItems) {
+            predictionHistory = predictionHistory.slice(0, maxHistoryItems);
+        }
+
+        // Guardar el historial actualizado
+        savePredictionHistory();
+        
+        // Actualizar la visualización
+        updateHistoryDisplay();
+
+        // Enviar la predicción al backend Node.js
+        fetch('http://localhost:3001/api/predicciones', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fecha: new Date(data.created_at).toISOString().slice(0, 19).replace('T', ' '),
+                temperatura: data.temperature,
+                humedad: data.humidity,
+                presion: data.pressure,
+                lluvia: data.rainProbability,
+                frio: data.coldRisk,
+                confort: data.comfortIndex
+            })
+        }).catch(err => console.error('Error enviando al backend:', err));
+    }
 }
 
 // Función para actualizar los datos en tiempo real
@@ -203,6 +348,10 @@ function updateCurrentData(data) {
     document.getElementById('pressure').textContent = `${data.pressure.toFixed(2)} hPa`;
     document.getElementById('rain-probability').textContent = `${data.rainProbability}%`;
     document.getElementById('cold-risk').textContent = `${data.coldRisk}%`;
+    document.getElementById('comfort-index').textContent = `${data.comfortIndex}%`;
+    
+    // Actualizar el historial de predicciones solo si hay nuevos datos
+    updatePredictionHistory(data);
 }
 
 // Función para actualizar las gráficas
@@ -291,32 +440,68 @@ async function loadInitialHistory() {
 
 // Función para calcular predicciones usando lógica difusa
 function calculateFuzzyPredictions(temperature, humidity, pressure) {
-    let rainProbability = 0;
-    let coldRisk = 0;
+    // Funciones de pertenencia difusas
+    const triangular = (x, a, b, c) => Math.max(0, Math.min((x-a)/(b-a), 1, (c-x)/(c-b)));
+    const trapezoidal = (x, a, b, c, d) => Math.max(0, Math.min((x-a)/(b-a), 1, (d-x)/(d-c)));
 
-    // Cálculo de probabilidad de lluvia
-    if (humidity > 70 && pressure < 1000) {
-        rainProbability = 80;
-    } else if (humidity > 50 && pressure < 1010) {
-        rainProbability = 50;
-    } else {
-        rainProbability = 20;
-    }
+    // Fuzzificación de temperatura
+    const tempFria = triangular(temperature, -10, 0, 10);
+    const tempTemplada = triangular(temperature, 5, 15, 25);
+    const tempCalida = triangular(temperature, 20, 30, 40);
+    
+    // Fuzzificación de humedad
+    const humedadBaja = trapezoidal(humidity, 0, 0, 30, 50);
+    const humedadMedia = trapezoidal(humidity, 30, 50, 70, 90);
+    const humedadAlta = trapezoidal(humidity, 70, 90, 100, 100);
 
-    // Cálculo de riesgo de frío
-    if (temperature < 5) {
-        coldRisk = 90;
-    } else if (temperature < 10) {
-        coldRisk = 60;
-    } else if (temperature < 15) {
-        coldRisk = 30;
-    } else {
-        coldRisk = 10;
-    }
+    // Fuzzificación de presión
+    const presionBaja = trapezoidal(pressure, 950, 970, 990, 1010);
+    const presionNormal = trapezoidal(pressure, 990, 1010, 1020, 1040);
+    const presionAlta = trapezoidal(pressure, 1020, 1040, 1060, 1060);
+
+    // Sistema de reglas difusas para probabilidad de lluvia
+    const rainRules = [
+        Math.min(humedadAlta, presionBaja), // Regla 1: Si humedad alta Y presión baja -> lluvia alta
+        Math.min(humedadAlta, presionNormal), // Regla 2
+        Math.min(humedadMedia, presionBaja), // Regla 3
+        Math.min(humedadMedia, presionNormal, tempTemplada), // Regla 4
+        Math.min(humedadBaja, presionAlta) // Regla 5: Si humedad baja Y presión alta -> lluvia baja
+    ];
+
+    // Sistema de reglas difusas para riesgo de frío
+    const coldRules = [
+        Math.min(tempFria, humedadAlta), // Regla 1: Si temp fría Y humedad alta -> frío extremo
+        Math.min(tempFria, humedadMedia), // Regla 2
+        Math.min(tempTemplada, humedadAlta), // Regla 3
+        Math.min(tempTemplada, humedadMedia), // Regla 4
+        Math.min(tempCalida, humedadBaja) // Regla 5: Si temp cálida Y humedad baja -> frío bajo
+    ];
+
+    // Pesos para cada regla de lluvia (salidas singletons)
+    const rainWeights = [90, 70, 60, 40, 10];
+    // Pesos para cada regla de frío
+    const coldWeights = [95, 75, 60, 40, 15];
+
+    // Cálculo de los centroides (defuzzificación)
+    const rainNumerator = rainRules.reduce((sum, rule, i) => sum + rule * rainWeights[i], 0);
+    const rainDenominator = rainRules.reduce((sum, rule) => sum + rule, 0.001);
+    const rainProbability = rainNumerator / rainDenominator;
+
+    const coldNumerator = coldRules.reduce((sum, rule, i) => sum + rule * coldWeights[i], 0);
+    const coldDenominator = coldRules.reduce((sum, rule) => sum + rule, 0.001);
+    const coldRisk = coldNumerator / coldDenominator;
+
+    // Ajustes no lineales para interacciones complejas
+    const adjustedRain = Math.min(100, rainProbability * (1 + humedadAlta * 0.3 - humedadBaja * 0.2));
+    const adjustedCold = Math.min(100, coldRisk * (1 + tempFria * 0.4 - tempCalida * 0.3));
+
+    // Calcular el índice de confort
+    const comfortIndex = Math.round(100 - (adjustedCold * 0.7 + adjustedRain * 0.3));
 
     return {
-        rainProbability: Math.round(rainProbability),
-        coldRisk: Math.round(coldRisk)
+        rainProbability: Math.round(adjustedRain),
+        coldRisk: Math.round(adjustedCold),
+        comfortIndex: comfortIndex
     };
 }
 
@@ -350,6 +535,7 @@ async function fetchAndProcessData() {
 
                 processedData.rainProbability = predictions.rainProbability;
                 processedData.coldRisk = predictions.coldRisk;
+                processedData.comfortIndex = predictions.comfortIndex;
 
                 updateCurrentData(processedData);
                 updateCharts(processedData);
@@ -363,6 +549,7 @@ async function fetchAndProcessData() {
 // Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', async () => {
     initializeCharts();
+    loadPredictionHistory(); // Cargar el historial guardado
     await loadInitialHistory(); // Cargar historial inicial
     fetchAndProcessData();
     // Actualizar datos cada segundo
